@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->string('status')->default('Todo');
             $table->unsignedInteger('order_column');
+            $table->text('color')->nullable();
             $table->timestamps();
         });
 

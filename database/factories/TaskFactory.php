@@ -23,6 +23,8 @@ class TaskFactory extends Factory
             'urgent'=> fake()->randomElement([true, false]),
             'progress'=> fake()->numberBetween(0, 100),
             'user_id' => User::factory(),
+            'color'=> fake()->hexColor(),
+            'created_at'=> fake()->date(),
         ];
     }
 }

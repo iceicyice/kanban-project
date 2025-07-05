@@ -11,6 +11,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Pages\Model;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Split;
 
 class TasksKanban extends KanbanBoard
 {
@@ -19,7 +24,6 @@ class TasksKanban extends KanbanBoard
     protected static ?string $title = 'Tasks';
     protected static string $model = Task::class;
     protected static string $statusEnum = TaskStatus::class;
-
 
     protected static string $headerView = 'tasks.kanban-header';
 
@@ -70,12 +74,21 @@ class TasksKanban extends KanbanBoard
                 })
                 ->model(Task::class)
                 ->form(
-                    [
-                        TextInput::make('title'),
-                        Textarea::make('description'),
-                        Select::make('team')
-                            ->multiple()
-                            ->relationship(name: 'team', titleAttribute: 'name'),
+                    [   
+                        Split::make([
+                            Section::make([
+                                TextInput::make('title'),
+                                Textarea::make('description'),
+                                Select::make('team')
+                                    ->multiple()
+                                    ->relationship(name: 'team', titleAttribute: 'name'),
+                            ]),
+                            Section::make([
+                                Checkbox::make('Urgent'),       
+                                ColorPicker::make('color'),
+                            ])->grow(false),
+                        ])->from('sm')
+                        
                     ]
                 )
         ];
@@ -85,7 +98,10 @@ class TasksKanban extends KanbanBoard
     {
         return [
                 TextInput::make('title'),
-                Textarea::make('description'),                 
+                Textarea::make('description'),    
+                Select::make('team')
+                            ->multiple()
+                            ->relationship(name: 'team', titleAttribute: 'name'),             
         ];
     }
 
