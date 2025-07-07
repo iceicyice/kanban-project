@@ -2,20 +2,24 @@
 
 namespace App\Filament\Pages;
 use App\Models\Task;
-use App\Enums\TaskStatus;
 use App\Models\TaskUser;
-use Illuminate\Support\Collection;
-use Mokhosh\FilamentKanban\Pages\KanbanBoard;
-use Filament\Actions\CreateAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use App\Enums\TaskStatus;
 use Filament\Pages\Model;
+use Filament\Actions\CreateAction;
+use Illuminate\Support\Collection;
+use Filament\Forms\Components\Split;
+use App\Forms\Components\RangeSlider;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Split;
+use Mokhosh\FilamentKanban\Pages\KanbanBoard;
+use Illuminate\Support\Facades\Auth;
+
 
 class TasksKanban extends KanbanBoard
 {
@@ -25,27 +29,56 @@ class TasksKanban extends KanbanBoard
     protected static string $model = Task::class;
     protected static string $statusEnum = TaskStatus::class;
 
+    protected static string $view = 'tasks.kanban-board';
+
     protected static string $headerView = 'tasks.kanban-header';
 
     protected static string $recordView = 'tasks.kanban-record';
 
     protected static string $statusView = 'tasks.kanban-status';
 
+    public string $search = '';
 
 
-
-    protected function statuses(): Collection
+    public function getStatusesProperty(): Collection
     {
-        return TaskStatus::statuses();
+        $records = $this->records();
+
+        return collect(TaskStatus::cases())->map(function ($status) use ($records) {
+            return [
+                'id' => $status->value,
+                'title' => $status->name,
+                'records' => $records->where('status', $status->value)->values(),
+            ];
+        });
     }
 
     protected function records(): Collection
     {
-        // return $this->getEloquentQuery()
-        //     ->when(method_exists(static::$model, 'scopeOrdered'), fn ($query) => $query->ordered())
-        //     ->get();
 
-        return Task::ordered()->get();
+        // return Task::ordered()->get();
+        $query = Task::with(['team', 'user'])
+        ->where(function ($query) {
+            $query->where('user_id', Auth::id()) // task owner
+                  ->orWhereHas('team', function ($teamQuery) {
+                      $teamQuery->where('user_id', Auth::id()); // team owner
+                  });
+        });
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        return $query->ordered()->get();   
+
+    }
+
+    public function updatedSearch()
+    {
+        $this->dispatch('$refresh');
     }
 
     public function onStatusChanged(string|int $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
@@ -77,11 +110,11 @@ class TasksKanban extends KanbanBoard
                     [   
                         Split::make([
                             Section::make([
-                                TextInput::make('title'),
-                                Textarea::make('description'),
+                                TextInput::make('title')->required(),
+                                Textarea::make('description')->required(),
                                 Select::make('team')
                                     ->multiple()
-                                    ->relationship(name: 'team', titleAttribute: 'name'),
+                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),
                             ]),
                             Section::make([
                                 Checkbox::make('Urgent'),       
@@ -97,12 +130,15 @@ class TasksKanban extends KanbanBoard
     protected function getEditModalFormSchema(string|int|null $recordId): array
     {
         return [
-                TextInput::make('title'),
-                Textarea::make('description'),    
+                TextInput::make('title')->required(),
+                Textarea::make('description')->required(),    
                 Select::make('team')
                             ->multiple()
-                            ->relationship(name: 'team', titleAttribute: 'name'),             
-        ];
+                            ->relationship(name: 'team', titleAttribute: 'name')->required(),
+                
+                RangeSlider::make('progress')
+                            ->live()
+                ];
     }
 
     protected function additionalRecordData(Model $record): Collection
@@ -114,4 +150,5 @@ class TasksKanban extends KanbanBoard
             'description' => $record->description,
         ]);
     }
+
 }
