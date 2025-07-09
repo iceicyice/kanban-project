@@ -11,7 +11,8 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "mokhosh/filament-kanban": "^2.10",
-        "spatie/eloquent-sortable": "^4.5"
+        "spatie/eloquent-sortable": "^4.5",
+        "spatie/laravel-permission": "^6.20"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
