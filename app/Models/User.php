@@ -7,13 +7,13 @@ use Filament\Panel;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
-use Filament\Models\Contracts\FilamentUser;
+// use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -62,13 +62,5 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(Task::class);
     }
 
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->hasRole('Admin');
-    }
 
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class);
-    }
 }
