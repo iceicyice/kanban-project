@@ -7,7 +7,9 @@ use App\Enums\TaskStatus;
 use Filament\Pages\Model;
 use Filament\Actions\CreateAction;
 use Illuminate\Support\Collection;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Split;
+use Illuminate\Support\Facades\Auth;
 use App\Forms\Components\RangeSlider;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
@@ -18,7 +20,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Components\ColorPicker;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
-use Illuminate\Support\Facades\Auth;
 
 
 class TasksKanban extends KanbanBoard
@@ -36,9 +37,19 @@ class TasksKanban extends KanbanBoard
     protected static string $recordView = 'tasks.kanban-record';
 
     protected static string $statusView = 'tasks.kanban-status';
+    protected static ?int $navigationSort = 2;
 
     public string $search = '';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return Task::getModel()::count();
+    }
+    
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'The number of Tasks';
+    }
 
     public function getStatusesProperty(): Collection
     {
@@ -56,23 +67,23 @@ class TasksKanban extends KanbanBoard
     protected function records(): Collection
     {
 
-        // return Task::ordered()->get();
-        $query = Task::with(['team', 'user'])
-        ->where(function ($query) {
-            $query->where('user_id', Auth::id()) // task owner
-                  ->orWhereHas('team', function ($teamQuery) {
-                      $teamQuery->where('user_id', Auth::id()); // team owner
-                  });
-        });
+        return Task::ordered()->get();
+        // $query = Task::with(['team', 'user'])
+        // ->where(function ($query) {
+        //     $query->where('user_id', Auth::id()) // task owner
+        //           ->orWhereHas('team', function ($teamQuery) {
+        //               $teamQuery->where('user_id', Auth::id()); // team owner
+        //           });
+        // });
 
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                ->orWhere('description', 'like', '%' . $this->search . '%');
-            });
-        }
+        // if ($this->search) {
+        //     $query->where(function ($q) {
+        //         $q->where('title', 'like', '%' . $this->search . '%')
+        //         ->orWhere('description', 'like', '%' . $this->search . '%');
+        //     });
+        // }
 
-        return $query->ordered()->get();   
+        // return $query->ordered()->get();   
 
     }
 
@@ -118,7 +129,8 @@ class TasksKanban extends KanbanBoard
                             ]),
                             Section::make([
                                 Checkbox::make('Urgent'),       
-                                ColorPicker::make('color'),
+                                ColorPicker::make('color')
+                                    ->hexColor(),
                             ])->grow(false),
                         ])->from('sm')
                         
