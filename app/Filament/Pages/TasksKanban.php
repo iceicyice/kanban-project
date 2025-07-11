@@ -19,6 +19,10 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
 
@@ -39,11 +43,28 @@ class TasksKanban extends KanbanBoard
     protected static string $statusView = 'tasks.kanban-status';
     protected static ?int $navigationSort = 2;
 
+    protected string $editModalTitle = 'Edit Task';
+
+    protected string $editModalWidth = '4xl';
+
+    protected string $editModalSaveButtonLabel = 'Save';
+
+    protected string $editModalCancelButtonLabel = 'Cancel';
+    
+
     public string $search = '';
+
 
     public static function getNavigationBadge(): ?string
     {
-        return Task::getModel()::count();
+        $userId = Auth::id();
+
+        return Task::where(function ($query) use ($userId) {
+            $query->where('user_id', $userId)
+                ->orWhereHas('team', function ($teamQuery) use ($userId) {
+                    $teamQuery->where('user_id', $userId);
+                });
+        })->count();
     }
     
     public static function getNavigationBadgeTooltip(): ?string
@@ -67,23 +88,23 @@ class TasksKanban extends KanbanBoard
     protected function records(): Collection
     {
 
-        return Task::ordered()->get();
-        // $query = Task::with(['team', 'user'])
-        // ->where(function ($query) {
-        //     $query->where('user_id', Auth::id()) // task owner
-        //           ->orWhereHas('team', function ($teamQuery) {
-        //               $teamQuery->where('user_id', Auth::id()); // team owner
-        //           });
-        // });
+        // return Task::ordered()->get();
+        $query = Task::with(['team', 'user'])
+        ->where(function ($query) {
+            $query->where('user_id', Auth::id()) // task owner
+                  ->orWhereHas('team', function ($teamQuery) {
+                      $teamQuery->where('user_id', Auth::id()); // team
+                  });
+        });
 
-        // if ($this->search) {
-        //     $query->where(function ($q) {
-        //         $q->where('title', 'like', '%' . $this->search . '%')
-        //         ->orWhere('description', 'like', '%' . $this->search . '%');
-        //     });
-        // }
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
 
-        // return $query->ordered()->get();   
+        return $query->ordered()->get();   
 
     }
 
@@ -113,7 +134,6 @@ class TasksKanban extends KanbanBoard
             CreateAction::make()
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
-
                     return $data;
                 })
                 ->model(Task::class)
@@ -130,7 +150,8 @@ class TasksKanban extends KanbanBoard
                             Section::make([
                                 Checkbox::make('Urgent'),       
                                 ColorPicker::make('color')
-                                    ->hexColor(),
+                                    ->hexColor()
+                                    ->required(),
                             ])->grow(false),
                         ])->from('sm')
                         
@@ -142,14 +163,24 @@ class TasksKanban extends KanbanBoard
     protected function getEditModalFormSchema(string|int|null $recordId): array
     {
         return [
-                TextInput::make('title')->required(),
-                Textarea::make('description')->required(),    
-                Select::make('team')
-                            ->multiple()
-                            ->relationship(name: 'team', titleAttribute: 'name')->required(),
+                Split::make([
+                            Section::make([
+                                TextInput::make('title')->required(),
+                                Textarea::make('description')->required(),
+                                Select::make('team')
+                                    ->multiple()
+                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),
+                            ]),
+                            Section::make([
+                                Checkbox::make('Urgent'),       
+                                ColorPicker::make('color')
+                                    ->hexColor()
+                                    ->required(),
+                            ])->grow(false),
+                        ])->from('md'),
                 
                 RangeSlider::make('progress')
-                            ->live()
+                            ->live(),
                 ];
     }
 
@@ -162,5 +193,7 @@ class TasksKanban extends KanbanBoard
             'description' => $record->description,
         ]);
     }
+    
+    
 
 }

@@ -40,5 +40,14 @@ class Task extends Model implements Sortable
     {
         return $this->belongsToMany(User::class, 'task_user');
     }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($task) {
+            $task->team()->detach(); // or delete if it's a related model
+        });
+    }
     
 }

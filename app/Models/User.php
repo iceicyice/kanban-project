@@ -62,5 +62,8 @@ class User extends Authenticatable
         return $this->hasOne(Task::class);
     }
 
-
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar_url;
+    }
 }

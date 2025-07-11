@@ -1,5 +1,6 @@
 
 <x-filament-panels::page>
+
     <div class="flex justify-end items-center px-4 py-4 text-gray-700">
 
         <div class="w-64">

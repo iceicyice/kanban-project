@@ -34,18 +34,20 @@
     </div>
 
     <div class="flex hover:-space-x-1 -space-x-3">
-       
-            @if ($record['team']->count() < 5)
-                @foreach ($record['team']->slice(0,4) as $member)
-                    <div class="w-8 h-8 transition-all rounded-full bg-gray-200 border-2 border-white "> <x-heroicon-s-user class="text-gray-700"/> </div>
-                @endforeach
-            @else
-                @foreach ($record['team']->slice(0,4) as $member)
-                    <div class="w-8 h-8 transition-all rounded-full bg-gray-200 border-2 border-white "> <x-heroicon-s-user class="text-gray-700"/> </div>
-                @endforeach
-                <div class="pl-4 pt-2" style="font-size: 10px">+ More</div>
-            @endif
-            {{-- {{$record['team']->count()}} --}}
+        @foreach ($record['team']->slice(0, 4) as $member)
+            <div 
+                class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-white  rounded-full border-2" style="background-color : {{$record->color}}"
+                title="{{ $member->name }}"
+            >
+                {{ strtoupper(Str::limit($member->name, 2, '')) }}
+            </div>
+        @endforeach
+
+        @if ($record['team']->count() > 4)
+            <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-gray-700 bg-gray-200 rounded-full border-2 border-white" title="{{ $record['team']->count() - 4 }} more">
+                +{{ $record['team']->count() - 4 }}
+            </div>
+        @endif
     </div>
 
     <div class="flex mt-1">
