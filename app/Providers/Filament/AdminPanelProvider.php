@@ -70,10 +70,9 @@ class AdminPanelProvider extends PanelProvider
                 FilamentEditProfilePlugin::make()
                     ->shouldRegisterNavigation(false)
                     ->shouldShowAvatarForm(
-                        true,
-                        'avatars',
-                        'public',
-                        'mimes:jpeg,png|max:1024',
+                        value: true,
+                        directory: 'avatars', // image will be stored in 'storage/app/public/avatars
+                        rules: 'mimes:jpeg,png|max:1024', //only accept jpeg and png files with a maximum size of 1MB
                         
                     ),
             ]);
