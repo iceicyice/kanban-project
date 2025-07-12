@@ -14,6 +14,7 @@ use Filament\Actions\DeleteAction;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Split;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Auth;
 use App\Forms\Components\RangeSlider;
 use Filament\Forms\Components\Select;
@@ -55,6 +56,8 @@ class TasksKanban extends KanbanBoard
     
 
     public string $search = '';
+
+
 
 
     public static function getNavigationBadge(): ?string

@@ -77,7 +77,7 @@
         @endforeach
 
         @if ($record['team']->count() > 4)
-            <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-gray-700 bg-gray-200 rounded-full border-2 border-white">
+            <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold  text-gray-200 dark:text-gray-700 bg-gray-700 dark:bg-white rounded-full border-2">
                 +{{ $record['team']->count() - 4 }}
             </div>
         @endif
