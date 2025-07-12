@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div class="md:flex overflow-hidden overflow-y-hidden gap-4 pb-4">
+    <div class="md:flex overflow-x-auto-hidden overflow-y-hidden gap-4 pb-4">
         @foreach($this->statuses as $status)
             <div wire:key="kanban-status-{{ $status['id'] }}">
                 @include(static::$statusView, ['status' => $status])
