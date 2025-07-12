@@ -90,23 +90,23 @@ class TasksKanban extends KanbanBoard
     protected function records(): Collection
     {
 
-        // return Task::ordered()->get();
-        $query = Task::with(['team', 'user'])
-        ->where(function ($query) {
-            $query->where('user_id', Auth::id()) // task owner
-                  ->orWhereHas('team', function ($teamQuery) {
-                      $teamQuery->where('user_id', Auth::id()); // team
-                  });
-        });
+        return Task::ordered()->get();
+        // $query = Task::with(['team', 'user'])
+        // ->where(function ($query) {
+        //     $query->where('user_id', Auth::id()) // task owner
+        //           ->orWhereHas('team', function ($teamQuery) {
+        //               $teamQuery->where('user_id', Auth::id()); // team
+        //           });
+        // });
 
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                ->orWhere('description', 'like', '%' . $this->search . '%');
-            });
-        }
+        // if ($this->search) {
+        //     $query->where(function ($q) {
+        //         $q->where('title', 'like', '%' . $this->search . '%')
+        //         ->orWhere('description', 'like', '%' . $this->search . '%');
+        //     });
+        // }
 
-        return $query->ordered()->get();   
+        // return $query->ordered()->get();   
 
     }
 
