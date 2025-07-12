@@ -33,14 +33,47 @@
         {{ $record->description }}
     </div>
 
-    <div class="flex hover:-space-x-1 -space-x-3">
+    {{-- <div class="flex hover:-space-x-1 -space-x-3">
         @foreach ($record['team']->slice(0, 4) as $member)
             <img 
                 src="{{ Storage::url($member->avatar_url) }}"  class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-white rounded-full border-2" style="background-color : {{$record->color}}"
                 title="{{ $member->name }}"
-            >
+            > --}}
                 {{-- {{ strtoupper(Str::limit($member->name, 2, '')) }} --}}
             {{-- </div> --}}
+        {{-- @endforeach
+
+        @if ($record['team']->count() > 4)
+            <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-gray-700 bg-gray-200 rounded-full border-2 border-white">
+                +{{ $record['team']->count() - 4 }}
+            </div>
+        @endif
+    </div> --}}
+
+    <div class="flex hover:-space-x-1 -space-x-3">
+        @foreach ($record['team']->slice(0, 4) as $member)
+            @php
+                $avatarPath = $member->avatar_url;
+                $hasAvatar = $avatarPath && Storage::disk('public')->exists($avatarPath);
+                $initials = strtoupper(Str::limit($member->name, 2, ''));
+            @endphp
+
+            @if ($hasAvatar)
+                <img 
+                    src="{{ Storage::url($avatarPath) }}"
+                    class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-white rounded-full border-2"
+                    {{-- style="background-color: {{ $record->color }}" --}}
+                    title="{{ $member->name }}"
+                >
+            @else
+                <div
+                    class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-white rounded-full border-2"
+                    style="background-color: {{ $record->color }}"
+                    title="{{ $member->name }}"
+                >
+                    {{ $initials }}
+                </div>
+            @endif
         @endforeach
 
         @if ($record['team']->count() > 4)
@@ -49,6 +82,7 @@
             </div>
         @endif
     </div>
+
 
     <div class="flex mt-1">
         <div class="border-2 rounded-md border-solid text-xs flex-none w-14 mt-1 mr-1 text-center border-indigo-200" style="border-left-color: {{$record->color}};border-bottom-color: {{$record->color}};"> {{$record->created_at->format('d M')}} </div>

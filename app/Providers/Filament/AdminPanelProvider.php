@@ -37,9 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
-                    ->label(fn() => auth()->user()->name)
+                    ->label('Edit Profile')
                     ->url(fn (): string => EditProfilePage::getUrl())
-                    ->icon('heroicon-m-user-circle')
+                    ->icon('heroicon-m-cog-6-tooth')
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
