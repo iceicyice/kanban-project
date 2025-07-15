@@ -49,5 +49,9 @@ class Task extends Model implements Sortable
             $task->team()->detach(); // or delete if it's a related model
         });
     }
+
+    protected $casts = [
+        'urgent' => 'boolean',
+    ];
     
 }

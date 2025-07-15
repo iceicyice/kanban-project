@@ -25,6 +25,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\ColorPicker;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
@@ -57,7 +58,12 @@ class TasksKanban extends KanbanBoard
 
     public string $search = '';
 
+    public string $urgent = '';
 
+    public function getMaxContentWidth(): MaxWidth
+    {
+        return MaxWidth::MaxContent;
+    }
 
 
     public static function getNavigationBadge(): ?string
@@ -93,24 +99,27 @@ class TasksKanban extends KanbanBoard
     protected function records(): Collection
     {
 
-        return Task::ordered()->get();
-        // $query = Task::with(['team', 'user'])
-        // ->where(function ($query) {
-        //     $query->where('user_id', Auth::id()) // task owner
-        //           ->orWhereHas('team', function ($teamQuery) {
-        //               $teamQuery->where('user_id', Auth::id()); // team
-        //           });
-        // });
+        // $query = Task::query();
+        $query = Task::with(['team', 'user'])
+        ->where(function ($query) {
+            $query->where('user_id', Auth::id()) // task owner
+                  ->orWhereHas('team', function ($teamQuery) {
+                      $teamQuery->where('user_id', Auth::id()); // team
+                  });
+        });
 
-        // if ($this->search) {
-        //     $query->where(function ($q) {
-        //         $q->where('title', 'like', '%' . $this->search . '%')
-        //         ->orWhere('description', 'like', '%' . $this->search . '%');
-        //     });
-        // }
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
 
-        // return $query->ordered()->get();   
+        if ($this->urgent === 'checked') {
+            $query->where('urgent', 1); // or 1 if it's stored as an integer
+        }
 
+        return $query->ordered()->get();
     }
 
     public function updatedSearch()
@@ -151,9 +160,10 @@ class TasksKanban extends KanbanBoard
                                 Select::make('team')
                                     ->multiple()
                                     ->relationship(name: 'team', titleAttribute: 'name')->required(),
+                                RichEditor::make('note')
                             ]),
                             Section::make([
-                                Checkbox::make('Urgent'),       
+                                Checkbox::make('urgent'),       
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -161,7 +171,15 @@ class TasksKanban extends KanbanBoard
                         ])->from('sm')
                         
                     ]
-                )
+                ),
+                Action::make('toggleUrgent')
+                    ->label(fn () => $this->urgent === 'checked' ? 'Show All Tasks' : 'Show Urgent Only')
+                    ->icon('heroicon-o-clock')
+                    ->color(fn () => $this->urgent === 'checked' ? 'gray' : 'danger')
+                    ->action(function () {
+                        $this->urgent = $this->urgent === 'checked' ? '' : 'checked';
+                        $this->dispatch('$refresh'); // this will rerender the board
+                    })
         ];
     }
 
@@ -175,9 +193,10 @@ class TasksKanban extends KanbanBoard
                                 Select::make('team')
                                     ->multiple()
                                     ->relationship(name: 'team', titleAttribute: 'name')->required(),
+                                RichEditor::make('note'),
                             ]),
                             Section::make([
-                                Checkbox::make('Urgent'),       
+                                Checkbox::make('urgent'),       
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),

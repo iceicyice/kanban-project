@@ -69,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->shouldRegisterNavigation(false)
+                    ->shouldShowDeleteAccountForm(false)
                     ->shouldShowAvatarForm(
                         value: true,
                         directory: 'avatars', // image will be stored in 'storage/app/public/avatars

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('urgent')->default(false);
             $table->tinyInteger('progress')->default(0);
+            $table->text('note')->nullable();
             $table->foreignId('user_id')->constrained();
             $table->string('status')->default('Todo');
             $table->unsignedInteger('order_column');
