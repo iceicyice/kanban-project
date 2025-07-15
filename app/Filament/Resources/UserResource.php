@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\UserResource\Pages;
@@ -73,13 +74,17 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('avatar_url')
+                            ->label('Avatar')
+                            ->circular()
+                            ->checkFileExistence(false),
                 TextColumn::make('name')
-                ->searchable()
-                ->sortable(),
+                            ->searchable()
+                            ->sortable(),
                 TextColumn::make('email')
-                ->searchable(),
+                            ->searchable(),
                 TextColumn::make('roles.name')
-                ->sortable(),
+                            ->sortable(),
                 TextColumn::make('email_verified_at'),
             ])
             ->filters([

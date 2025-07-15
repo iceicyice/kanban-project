@@ -1,7 +1,7 @@
 
 <x-filament-panels::page>
 
-    <div class="flex justify-end items-center px-4 py-4 text-gray-700 bg-gray-800 border border-gray-800" style="border-radius: 30px">
+    <div class="flex justify-end items-center px-4 py-4 bg-gray-300 boder-gray-300 text-gray-700 dark:bg-gray-800 border dark:border-gray-800" style="border-radius: 30px">
 
         <div class="w-64">
             <input

@@ -24,7 +24,7 @@
             {{ $record->{static::$recordTitleAttribute} }}
     
             @if ($record['urgent'])
-                <x-heroicon-s-star class="inline-block text-red-500 w-4 h-4"/>
+                <x-heroicon-s-star class="inline-block text-pink-500 w-4 h-4"/>
             @endif
         </div>
     </div>

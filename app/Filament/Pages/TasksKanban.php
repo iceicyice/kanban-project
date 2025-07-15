@@ -80,7 +80,15 @@ class TasksKanban extends KanbanBoard
     
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'The number of Tasks';
+        $userId = Auth::id();
+
+        return Task::where(function ($query) use ($userId) {
+            $query->where('urgent', 1)
+                    ->where('user_id', $userId)
+                    ->orWhereHas('team', function ($teamQuery) use ($userId) {
+                        $teamQuery->where('user_id', $userId);
+                    });
+            })->count(). " Urgent Tasks";
     }
 
     public function getStatusesProperty(): Collection
@@ -116,7 +124,7 @@ class TasksKanban extends KanbanBoard
         }
 
         if ($this->urgent === 'checked') {
-            $query->where('urgent', 1); // or 1 if it's stored as an integer
+            $query->where('urgent', 1); 
         }
 
         return $query->ordered()->get();
@@ -178,7 +186,7 @@ class TasksKanban extends KanbanBoard
                     ->color(fn () => $this->urgent === 'checked' ? 'gray' : 'danger')
                     ->action(function () {
                         $this->urgent = $this->urgent === 'checked' ? '' : 'checked';
-                        $this->dispatch('$refresh'); // this will rerender the board
+                        $this->dispatch('$refresh'); // rerender the board
                     })
         ];
     }
@@ -200,11 +208,12 @@ class TasksKanban extends KanbanBoard
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
+                                RangeSlider::make('progress')
+                                    ->live(),
                             ])->grow(false),
                         ])->from('md'),
                 
-                RangeSlider::make('progress')
-                            ->live(),
+                
                 ];
     }
 
