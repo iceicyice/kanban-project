@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 use Filament\Panel;
 use App\Models\Task;
+use App\Models\Status;
 use App\Models\TaskUser;
 use App\Enums\TaskStatus;
 use Filament\Pages\Model;
@@ -36,7 +37,6 @@ class TasksKanban extends KanbanBoard
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $title = 'Tasks';
     protected static string $model = Task::class;
-    protected static string $statusEnum = TaskStatus::class;
 
     protected static string $view = 'tasks.kanban-board';
 
@@ -62,9 +62,8 @@ class TasksKanban extends KanbanBoard
 
     public function getMaxContentWidth(): MaxWidth
     {
-        return MaxWidth::MaxContent;
+        return MaxWidth::Full;
     }
-
 
     public static function getNavigationBadge(): ?string
     {
@@ -91,15 +90,38 @@ class TasksKanban extends KanbanBoard
             })->count(). " Urgent Tasks";
     }
 
+    // public function getStatusesProperty(): Collection
+    // {
+    //     $records = $this->records();
+
+    //     return collect(TaskStatus::cases())->map(function ($status) use ($records) {
+    //         return [
+    //             'id' => $status->value,
+    //             'title' => $status->name,
+    //             'records' => $records->where('status', $status->value)->values(),
+    //         ];
+    //     });
+    // }
+
+    protected function statuses(): Collection
+    {
+            return Status::orderBy('order_column')->get()->map(function ($status) {
+                return [
+                    'id' => $status->id,
+                    'title' => $status->name,
+                ];
+            });
+    }
+
     public function getStatusesProperty(): Collection
     {
         $records = $this->records();
 
-        return collect(TaskStatus::cases())->map(function ($status) use ($records) {
+        return Status::orderBy('order_column')->get()->map(function ($status) use ($records) {
             return [
-                'id' => $status->value,
+                'id' => $status->id,
                 'title' => $status->name,
-                'records' => $records->where('status', $status->value)->values(),
+                'records' => $records->where('status_id', $status->id)->values(),
             ];
         });
     }
@@ -137,7 +159,7 @@ class TasksKanban extends KanbanBoard
 
     public function onStatusChanged(string|int $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
     {
-        Task::find($recordId)->update(['status' => $status]);
+        Task::find($recordId)->update(['status_id' => $status]);
         Task::ignoreTimestamps();
         Task::setNewOrder($toOrderedIds);
         Task::ignoreTimestamps(false);

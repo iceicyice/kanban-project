@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Models\Task;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Status;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -27,7 +29,32 @@ class DatabaseSeeder extends Seeder
             'email' => 'ice2@gmail.com',
         ]);
 
+        DB::table('statuses')->insert([
+            'name' => 'Pending',
+            'order_column' => '1',
+
+        ]);
+
+        DB::table('statuses')->insert([
+            'name' => 'Todo',
+            'order_column' => '2',
+
+        ]);
+
+        DB::table('statuses')->insert([
+            'name' => 'Doing',
+            'order_column' => '3',
+
+        ]);
+
+        DB::table('statuses')->insert([
+            'name' => 'Done',
+            'order_column' => '4',
+        ]);
+
+
         $users = User::factory(10)->create();
+
 
         $tasks = Task::factory(30)
         ->recycle($users)

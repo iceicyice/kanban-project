@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Status;
 use Spatie\EloquentSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory; 
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 
@@ -29,6 +31,11 @@ class Task extends Model implements Sortable
     public function user(): BelongsTo
     { 
         return $this->belongsTo(User::class);
+    }
+
+    public function statuses(): HasOne
+    { 
+        return $this->belongsTo(Status::class);
     }
 
     /**

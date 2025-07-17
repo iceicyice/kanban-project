@@ -19,7 +19,7 @@ return new class extends Migration
             $table->tinyInteger('progress')->default(0);
             $table->text('note')->nullable();
             $table->foreignId('user_id')->constrained();
-            $table->string('status')->default('Todo');
+            $table->foreignId('status_id')->default(1)->constrained();
             $table->unsignedInteger('order_column');
             $table->text('color')->nullable();
             $table->timestamps();
