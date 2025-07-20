@@ -36,9 +36,7 @@ class StatusResource extends Resource
                         ->filled()
                         ->required(fn (Page $livewire) => ($livewire instanceof CreateRecord)),
                     TextInput::make('order_column')
-                        ->filled()
                         ->numeric()
-                        ->required(fn (Page $livewire) => ($livewire instanceof CreateRecord)),
                 ])->columns(2)
             ]);
     }
