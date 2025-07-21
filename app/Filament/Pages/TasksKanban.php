@@ -23,6 +23,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
@@ -190,13 +191,15 @@ class TasksKanban extends KanbanBoard
                                 Select::make('team')
                                     ->multiple()
                                     ->relationship(name: 'team', titleAttribute: 'name')->required(),
-                                RichEditor::make('note')
+                                RichEditor::make('note'),
+                                
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),       
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
+                                TagsInput::make('tag')
                             ])->grow(false),
                         ])->from('sm')
                         
@@ -230,6 +233,8 @@ class TasksKanban extends KanbanBoard
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
+                                TagsInput::make('tag')
+                                    ->label('Tags'),
                                 RangeSlider::make('progress')
                                     ->live(),
                             ])->grow(false),
