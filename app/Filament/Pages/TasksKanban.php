@@ -251,6 +251,7 @@ class TasksKanban extends KanbanBoard
             'progress' => $record->progress,
             'team' => $record->team,
             'description' => $record->description,
+            'tag' => $record->tag,
         ]);
     }
     

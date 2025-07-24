@@ -95,4 +95,13 @@
         <div class="text-xs flex-none w-8 mt-1 ml-2"> {{$record['progress']}}%</div>
     </div>
 
+    
+    <div class="flex flex-wrap gap-1.5 mt-1.5">
+        <label class="text-xs" for="">Tags :</label>
+        @foreach($record['tag'] as $tag)
+            <span class="border rounded-md border-none text-xs bg-gray-300 dark:bg-gray-800 pl-1 pr-1 py-0.5 pb-0.5 ">
+                {{ $tag }}
+            </span>
+        @endforeach
+    </div>
 </div>
