@@ -60,6 +60,7 @@ class Task extends Model implements Sortable
     protected $casts = [
         'urgent' => 'boolean',
         'tag' => 'array',
+        'attachment' => 'array',
     ];
     
 }

@@ -27,6 +27,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\ColorPicker;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
@@ -50,7 +51,7 @@ class TasksKanban extends KanbanBoard
 
     protected string $editModalTitle = 'Edit Task';
 
-    protected string $editModalWidth = '4xl';
+    protected string $editModalWidth = '5xl';
 
     protected string $editModalSaveButtonLabel = 'Save';
 
@@ -188,21 +189,27 @@ class TasksKanban extends KanbanBoard
                             Section::make([
                                 TextInput::make('title')->required(),
                                 Textarea::make('description')->required(),
-                                Select::make('team')
-                                    ->multiple()
-                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),
                                 RichEditor::make('note'),
-                                
+                                FileUpload::make('attachment')
+                                    ->directory('task-attachments')
+                                    ->visibility('private')
+                                    ->preserveFilenames()
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->openable(),
                             ]),
                             Section::make([
-                                Checkbox::make('urgent'),       
+                                Checkbox::make('urgent'),
+                                Select::make('team')
+                                    ->multiple()
+                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),   
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
                                 TagsInput::make('tag')
-                            ])->grow(false),
-                        ])->from('sm')
-                        
+                                    ->label('Tags'),
+                            ])->grow(true),
+                        ])->from('xs'),
                     ]
                 ),
                 Action::make('toggleUrgent')
@@ -223,13 +230,20 @@ class TasksKanban extends KanbanBoard
                             Section::make([
                                 TextInput::make('title')->required(),
                                 Textarea::make('description')->required(),
-                                Select::make('team')
-                                    ->multiple()
-                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),
                                 RichEditor::make('note'),
+                                FileUpload::make('attachment')
+                                    ->directory('task-attachments')
+                                    ->visibility('private')
+                                    ->preserveFilenames()
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->openable(),
                             ]),
                             Section::make([
-                                Checkbox::make('urgent'),       
+                                Checkbox::make('urgent'),
+                                Select::make('team')
+                                    ->multiple()
+                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),   
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -237,10 +251,8 @@ class TasksKanban extends KanbanBoard
                                     ->label('Tags'),
                                 RangeSlider::make('progress')
                                     ->live(),
-                            ])->grow(false),
-                        ])->from('md'),
-                
-                
+                            ])->grow(true),
+                        ])->from('xs'),
                 ];
     }
 
