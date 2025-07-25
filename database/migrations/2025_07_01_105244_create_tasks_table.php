@@ -11,6 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('task_projects', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description');
+            $table->timestamps();
+            $table->date('deadline')->nullable();
+        });
+
+        Schema::create('task_project_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('task_project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        });
+
+        Schema::create('statuses', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->unsignedInteger('order_column')->default(1);
+            $table->foreignId('task_project_id')
+                ->constrained('task_projects')
+                ->cascadeOnDelete();
+            $table->timestamps();
+        });
+
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('title');
@@ -20,17 +45,14 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->text('tag')->nullable();
             $table->text('attachment')->nullable();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('status_id')->default(1)->constrained();
+            $table->foreignId('task_project_id')->constrained();
+            $table->foreignId('status_id')->default(1)->constrained('statuses');
             $table->unsignedInteger('order_column');
             $table->text('color')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('task_user', function (Blueprint $table) {
-            $table->foreignId('task_id')->constrained();
-            $table->foreignId('user_id')->constrained();
-        });
+        
     }
 
     /**

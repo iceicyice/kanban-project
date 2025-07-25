@@ -18,7 +18,7 @@
 >
 
     <div class="">
-        <div class="text-xs text-left text-gray-400"> {{ $record->user->name }} </div>
+        <div class="text-xs text-left text-gray-400"> {{ $record->project->name }} </div>
         <div class="border-b" style="border-color: {{$record->color}}"></div>
         <div>
             {{ $record->{static::$recordTitleAttribute} }}
@@ -51,7 +51,7 @@
     </div> --}}
 
     <div class="flex hover:-space-x-1 -space-x-3">
-        @foreach ($record['team']->slice(0, 4) as $member)
+        @foreach ($record->project->users->slice(0, 4) as $member)
             @php
                 $avatarPath = $member->avatar_url;
                 $hasAvatar = $avatarPath && Storage::disk('public')->exists($avatarPath);
@@ -76,9 +76,9 @@
             @endif
         @endforeach
 
-        @if ($record['team']->count() > 4)
+        @if ($record->project->users->count() > 4)
             <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold  text-gray-200 dark:text-gray-700 bg-gray-700 dark:bg-white rounded-full border-2">
-                +{{ $record['team']->count() - 4 }}
+                +{{ $record->project->users->count() - 4 }}
             </div>
         @endif
     </div>

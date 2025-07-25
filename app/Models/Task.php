@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Status;
+use App\Models\TaskProject;
 use Spatie\EloquentSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait;
@@ -17,6 +18,20 @@ class Task extends Model implements Sortable
     /** @use HasFactory<\Database\Factories\TaskFactory> */
     use HasFactory, SortableTrait;
 
+    protected $fillable = [
+        'title',
+        'description',
+        'urgent',
+        'progress',
+        'note',
+        'tag',
+        'attachment',
+        'color',
+        'status_id',
+        'task_project_id',
+        'order_column'
+    ];
+
     protected $guarded = [];
 
     public static function ignoreTimestamps($should = true)
@@ -28,24 +43,14 @@ class Task extends Model implements Sortable
         }
     }
 
-    public function user(): BelongsTo
-    { 
-        return $this->belongsTo(User::class);
-    }
-
-    public function statuses(): HasOne
-    { 
-        return $this->belongsTo(Status::class);
-    }
-
     /**
      * The roles that belong to the Task
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function team(): BelongsToMany
+    public function project(): BelongsTo
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsTo(TaskProject::class, 'task_project_id');
     }
 
     public static function boot()
@@ -63,4 +68,8 @@ class Task extends Model implements Sortable
         'attachment' => 'array',
     ];
     
+    public function statuses()
+    {
+        return $this->belongsToMany(Status::class, 'task_status');
+    }
 }

@@ -4,11 +4,18 @@ namespace App\Providers\Filament;
 
 use Filament\Pages;
 use Filament\Panel;
+use App\Models\Task;
 use Filament\Widgets;
+use App\Models\TaskProject;
 use Filament\PanelProvider;
+use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use App\Filament\Pages\TasksKanban;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
+use Illuminate\Support\Facades\Route;
+use Filament\Navigation\NavigationItem;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -28,8 +35,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('')
-            ->path('')
+            ->id('admin')
+            ->path('admin')
             ->login()
             ->registration(Register::class)
             ->colors([
@@ -46,6 +53,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                \App\Filament\Pages\TasksKanban::class
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -77,5 +85,27 @@ class AdminPanelProvider extends PanelProvider
                         
                     ),
             ]);
+    }
+
+    public function boot(): void
+    {
+
+        Filament::serving(function () {
+            $user = Auth::user();
+            if (! $user) return;
+
+            $projects = TaskProject::whereHas('users', fn ($q) => $q->where('users.id', $user->id))->get();
+
+            foreach ($projects as $project) {
+                Filament::registerNavigationItems([
+                    NavigationItem::make($project->name)
+                        ->group('Projects')
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->url('/admin/tasks-kanban?project=' . $project->id)
+                        ->badge(Task::where('task_project_id', $project->id)->count())
+                        ->isActiveWhen(fn () => request()->query('project') == $project->id)
+                ]);
+            }
+        });
     }
 }

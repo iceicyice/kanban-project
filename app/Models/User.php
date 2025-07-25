@@ -4,15 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Panel;
+use App\Models\TaskProject;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
-use Filament\Models\Contracts\HasAvatar;
 // use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Support\Facades\Storage;
+use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements HasAvatar
@@ -56,14 +57,14 @@ class User extends Authenticatable implements HasAvatar
         ];
     }
     
-    public function team(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'task_user');
-    }
+    // public function team(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class, 'task_user');
+    // }
 
-    public function task(): HasOne
+    public function projects(): BelongsToMany
     {
-        return $this->hasOne(Task::class);
+        return $this->belongsToMany(TaskProject::class, 'project_user', 'user_id', 'task_project_id');
     }
 
     public function getFilamentAvatarUrl(): ?string

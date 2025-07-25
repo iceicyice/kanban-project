@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('statuses', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->unsignedInteger('order_column');
-            $table->timestamps();
-        });
+        
+
     }
 
     /**

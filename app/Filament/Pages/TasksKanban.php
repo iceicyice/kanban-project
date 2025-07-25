@@ -4,8 +4,7 @@ namespace App\Filament\Pages;
 use Filament\Panel;
 use App\Models\Task;
 use App\Models\Status;
-use App\Models\TaskUser;
-use App\Enums\TaskStatus;
+use App\Models\TaskProject;
 use Filament\Pages\Model;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -23,6 +22,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Textarea;
+use Filament\Navigation\NavigationItem;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
@@ -40,70 +40,54 @@ class TasksKanban extends KanbanBoard
     protected static ?string $title = 'Tasks';
     protected static string $model = Task::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
+    // protected static ?string $navigationGroup = 'Projects';
+
     protected static string $view = 'tasks.kanban-board';
-
     protected static string $headerView = 'tasks.kanban-header';
-
     protected static string $recordView = 'tasks.kanban-record';
-
     protected static string $statusView = 'tasks.kanban-status';
-    protected static ?int $navigationSort = 2;
+    // protected static ?int $navigationSort = 2;
 
     protected string $editModalTitle = 'Edit Task';
-
     protected string $editModalWidth = '5xl';
-
     protected string $editModalSaveButtonLabel = 'Save';
-
     protected string $editModalCancelButtonLabel = 'Cancel';
-    
 
     public string $search = '';
-
     public string $urgent = '';
+
+    public TaskProject $project;
+    protected static ?string $slug = 'tasks-kanban';
+    
+
+    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null): string
+    {
+        $parameters['project'] = $parameters['project'] ?? request()->route('project');
+        return route('filament.admin.pages.tasks-kanban', $parameters, $isAbsolute);
+    }
+
+    public function mount(): void
+    {
+        $this->form->fill();
+        
+        $projectId = request()->query('project');
+        $this->project = TaskProject::findOrFail($projectId);
+
+        // Check if the logged-in user is part of this project
+        $isMember = $this->project->users()->where('users.id', Auth::id())->exists();
+
+        if (! $isMember) {
+            abort(403, 'You are not authorized to view this project.');
+        }
+    }
+    
 
     public function getMaxContentWidth(): MaxWidth
     {
         return MaxWidth::Full;
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        $userId = Auth::id();
-
-        return Task::where(function ($query) use ($userId) {
-            $query->where('user_id', $userId)
-                ->orWhereHas('team', function ($teamQuery) use ($userId) {
-                    $teamQuery->where('user_id', $userId);
-                });
-        })->count();
-    }
-    
-    public static function getNavigationBadgeTooltip(): ?string
-    {
-        $userId = Auth::id();
-
-        return Task::where(function ($query) use ($userId) {
-            $query->where('urgent', 1)
-                    ->where('user_id', $userId)
-                    ->orWhereHas('team', function ($teamQuery) use ($userId) {
-                        $teamQuery->where('user_id', $userId);
-                    });
-            })->count(). " Urgent Tasks";
-    }
-
-    // public function getStatusesProperty(): Collection
-    // {
-    //     $records = $this->records();
-
-    //     return collect(TaskStatus::cases())->map(function ($status) use ($records) {
-    //         return [
-    //             'id' => $status->value,
-    //             'title' => $status->name,
-    //             'records' => $records->where('status', $status->value)->values(),
-    //         ];
-    //     });
-    // }
+    } 
 
     protected function statuses(): Collection
     {
@@ -119,26 +103,23 @@ class TasksKanban extends KanbanBoard
     {
         $records = $this->records();
 
-        return Status::orderBy('order_column')->get()->map(function ($status) use ($records) {
-            return [
-                'id' => $status->id,
-                'title' => $status->name,
-                'records' => $records->where('status_id', $status->id)->values(),
-            ];
-        });
+        return Status::where('task_project_id', $this->project->id)
+            ->orderBy('order_column')
+            ->get()
+            ->map(function ($status) use ($records){
+                return [
+                    'id' => $status->id,
+                    'title' => $status->name,
+                    'records' => $records->where('status_id', $status->id)->values(),
+                ];
+            });
     }
 
     protected function records(): Collection
     {
 
-        // $query = Task::query();
-        $query = Task::with(['team', 'user'])
-        ->where(function ($query) {
-            $query->where('user_id', Auth::id()) // task owner
-                  ->orWhereHas('team', function ($teamQuery) {
-                      $teamQuery->where('user_id', Auth::id()); // team
-                  });
-        });
+        $query = Task::query()
+            ->where('task_project_id', $this->project->id);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -179,7 +160,7 @@ class TasksKanban extends KanbanBoard
         return [
             CreateAction::make()
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['user_id'] = auth()->id();
+                    $data['task_project_id'] = $this->project->id;
                     return $data;
                 })
                 ->model(Task::class)
@@ -200,9 +181,6 @@ class TasksKanban extends KanbanBoard
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),
-                                Select::make('team')
-                                    ->multiple()
-                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),   
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -241,9 +219,6 @@ class TasksKanban extends KanbanBoard
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),
-                                Select::make('team')
-                                    ->multiple()
-                                    ->relationship(name: 'team', titleAttribute: 'name')->required(),   
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -256,12 +231,12 @@ class TasksKanban extends KanbanBoard
                 ];
     }
 
-    protected function additionalRecordData(Model $record): Collection
+
+    protected function additionalRecordData(Task $record): Collection
     {
         return collect([
             'urgent' => $record->urgent,
             'progress' => $record->progress,
-            'team' => $record->team,
             'description' => $record->description,
             'tag' => $record->tag,
         ]);
