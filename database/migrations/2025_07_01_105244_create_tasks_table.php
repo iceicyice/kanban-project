@@ -44,7 +44,9 @@ return new class extends Migration
             $table->tinyInteger('progress')->default(0);
             $table->text('note')->nullable();
             $table->text('tag')->nullable();
+            $table->date('deadline')->nullable();
             $table->text('attachment')->nullable();
+            $table->foreignId('user_id')->constrained();
             $table->foreignId('task_project_id')->constrained();
             $table->foreignId('status_id')->default(1)->constrained('statuses');
             $table->unsignedInteger('order_column');

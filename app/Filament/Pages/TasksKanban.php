@@ -4,8 +4,8 @@ namespace App\Filament\Pages;
 use Filament\Panel;
 use App\Models\Task;
 use App\Models\Status;
-use App\Models\TaskProject;
 use Filament\Pages\Model;
+use App\Models\TaskProject;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Navigation\MenuItem;
@@ -27,6 +27,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\ColorPicker;
@@ -65,7 +66,7 @@ class TasksKanban extends KanbanBoard
     public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null): string
     {
         $parameters['project'] = $parameters['project'] ?? request()->route('project');
-        return route('filament.admin.pages.tasks-kanban', $parameters, $isAbsolute);
+        return route('filament.pages.tasks-kanban', $parameters, $isAbsolute);
     }
 
     public function mount(): void
@@ -91,12 +92,13 @@ class TasksKanban extends KanbanBoard
 
     protected function statuses(): Collection
     {
-            return Status::orderBy('order_column')->get()->map(function ($status) {
-                return [
+            return Status::where('task_project_id', $this->project->id)
+                ->orderBy('order_column')
+                ->get()
+                ->map(fn ($status) => [
                     'id' => $status->id,
                     'title' => $status->name,
-                ];
-            });
+            ]);
     }
 
     public function getStatusesProperty(): Collection
@@ -161,6 +163,13 @@ class TasksKanban extends KanbanBoard
             CreateAction::make()
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['task_project_id'] = $this->project->id;
+                    $data['user_id'] = auth()->id();
+                    $defaultStatus = Status::where('task_project_id', $this->project->id)
+                    ->orderBy('order_column')
+                    ->first();
+                    if ($defaultStatus) {
+                        $data['status_id'] = $defaultStatus->id;
+                    }
                     return $data;
                 })
                 ->model(Task::class)
@@ -181,6 +190,7 @@ class TasksKanban extends KanbanBoard
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),
+                                DatePicker::make('deadline'),
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -219,6 +229,7 @@ class TasksKanban extends KanbanBoard
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),
+                                DatePicker::make('deadline'),
                                 ColorPicker::make('color')
                                     ->hexColor()
                                     ->required(),
@@ -239,6 +250,7 @@ class TasksKanban extends KanbanBoard
             'progress' => $record->progress,
             'description' => $record->description,
             'tag' => $record->tag,
+            'deadline' => $record->deadline,
         ]);
     }
     

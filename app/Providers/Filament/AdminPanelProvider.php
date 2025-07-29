@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login()
             ->registration(Register::class)
             ->colors([
@@ -101,7 +101,7 @@ class AdminPanelProvider extends PanelProvider
                     NavigationItem::make($project->name)
                         ->group('Projects')
                         ->icon('heroicon-o-clipboard-document-list')
-                        ->url('/admin/tasks-kanban?project=' . $project->id)
+                        ->url('/tasks-kanban?project=' . $project->id)
                         ->badge(Task::where('task_project_id', $project->id)->count())
                         ->isActiveWhen(fn () => request()->query('project') == $project->id)
                 ]);

@@ -18,7 +18,12 @@
 >
 
     <div class="">
-        <div class="text-xs text-left text-gray-400"> {{ $record->project->name }} </div>
+        <div class="flex flex-wrap justify-between">
+            <div class="text-xs text-left text-gray-400"> {{ $record->user->name }} </div>
+            <div class="text-xs float-right flex">
+                <x-heroicon-s-clock class="w-4 h-4"/> {{$record['deadline']?->format('d M') ? : 'No Deadline'}}
+            </div>
+        </div>
         <div class="border-b" style="border-color: {{$record->color}}"></div>
         <div>
             {{ $record->{static::$recordTitleAttribute} }}
@@ -29,26 +34,9 @@
         </div>
     </div>
 
-    <div class="text-xs text-gray-400 border-l-2 pl-1.5 mt-2 mb-2">
-        {{ $record->description }}
+    <div class="text-xs text-gray-400 border-l-2 pl-1.5 mt-2 mb-2 break-words">
+        {{ Str::limit($record['description'], 75) }}
     </div>
-
-    {{-- <div class="flex hover:-space-x-1 -space-x-3">
-        @foreach ($record['team']->slice(0, 4) as $member)
-            <img 
-                src="{{ Storage::url($member->avatar_url) }}"  class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-white rounded-full border-2" style="background-color : {{$record->color}}"
-                title="{{ $member->name }}"
-            > --}}
-                {{-- {{ strtoupper(Str::limit($member->name, 2, '')) }} --}}
-            {{-- </div> --}}
-        {{-- @endforeach
-
-        @if ($record['team']->count() > 4)
-            <div class="w-8 h-8 flex transition-all items-center justify-center text-xs font-semibold text-gray-700 bg-gray-200 rounded-full border-2 border-white">
-                +{{ $record['team']->count() - 4 }}
-            </div>
-        @endif
-    </div> --}}
 
     <div class="flex hover:-space-x-1 -space-x-3">
         @foreach ($record->project->users->slice(0, 4) as $member)
@@ -83,7 +71,6 @@
         @endif
     </div>
 
-
     <div class="flex mt-1">
         <div class="border-2 rounded-md border-solid text-xs flex-none w-14 mt-1 mr-1 text-center border-indigo-200" style="border-left-color: {{$record->color}};border-bottom-color: {{$record->color}};"> {{$record->created_at->format('d M')}} </div>
         <div class="flex-auto">
@@ -95,7 +82,8 @@
         <div class="text-xs flex-none w-8 mt-1 ml-2"> {{$record['progress']}}%</div>
     </div>
 
-    
+    <div class="border-b mt-1 bg-gray-700 dark:border-gray-500"></div>
+
     <div class="flex flex-wrap gap-1.5 mt-1.5">
         <label class="text-xs" for="">Tags :</label>
         @foreach($record['tag'] as $tag)

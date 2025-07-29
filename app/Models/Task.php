@@ -26,8 +26,10 @@ class Task extends Model implements Sortable
         'note',
         'tag',
         'attachment',
+        'deadline',
         'color',
         'status_id',
+        'user_id',
         'task_project_id',
         'order_column'
     ];
@@ -53,6 +55,11 @@ class Task extends Model implements Sortable
         return $this->belongsTo(TaskProject::class, 'task_project_id');
     }
 
+    public function user(): BelongsTo
+    { 
+        return $this->belongsTo(User::class);
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -66,6 +73,7 @@ class Task extends Model implements Sortable
         'urgent' => 'boolean',
         'tag' => 'array',
         'attachment' => 'array',
+        'deadline' => 'datetime',
     ];
     
     public function statuses()
