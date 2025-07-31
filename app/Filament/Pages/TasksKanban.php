@@ -49,6 +49,7 @@ class TasksKanban extends KanbanBoard
     protected static string $headerView = 'tasks.kanban-header';
     protected static string $recordView = 'tasks.kanban-record';
     protected static string $statusView = 'tasks.kanban-status';
+    protected static string $scriptsView = 'tasks.kanban-scripts';
     // protected static ?int $navigationSort = 2;
 
     protected string $editModalTitle = 'Edit Task';
@@ -61,6 +62,10 @@ class TasksKanban extends KanbanBoard
 
     public TaskProject $project;
     protected static ?string $slug = 'tasks-kanban';
+
+    protected $listeners = [
+        'updateStatusOrder',
+    ];
     
 
     public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null): string
@@ -148,6 +153,21 @@ class TasksKanban extends KanbanBoard
         Task::ignoreTimestamps();
         Task::setNewOrder($toOrderedIds);
         Task::ignoreTimestamps(false);
+    }
+
+    public function updateStatusOrder(array $orderedIds): void
+    {
+        foreach($orderedIds as $index =>$id){
+            Status::where('id', $id)->update(['order_column' => $index + 1]);
+        }
+
+        Notification::make()
+            ->title('Status order updated')
+            ->success()
+            ->duration(1500)
+            ->send();
+
+        $this->dispatch('$refresh');
     }
 
     public function onSortChanged(string|int $recordId, string $status,array $orderedIds): void

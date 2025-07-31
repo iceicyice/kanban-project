@@ -1,4 +1,5 @@
 <div
+    data-id="{{ $record->getKey() }}"
     id="{{ $record->getKey() }}"
     wire:key="record-{{ $record->getKey() }}"
     wire:click="recordClicked('{{ $record->getKey() }}', {{ @json_encode($record) }})"
