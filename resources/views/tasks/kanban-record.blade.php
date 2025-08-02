@@ -13,7 +13,7 @@
             setTimeout(() => {
                 $el.classList.remove('bg-primary-100', 'dark:bg-primary-800')
                 $el.classList.add('bg-white', 'dark:bg-gray-700')
-            }, 2000)
+            }, 1000)
         "
     @endif
 >
@@ -22,7 +22,27 @@
         <div class="flex flex-wrap justify-between">
             <div class="text-xs text-left text-gray-400"> {{ $record->user->name }} </div>
             <div class="text-xs float-right flex">
-                <x-heroicon-s-clock class="w-4 h-4"/> {{$record['deadline']?->format('d M') ? : 'No Deadline'}}
+                
+                @php
+                    use Carbon\Carbon;
+
+                    $specificDate = Carbon::parse($record['deadline']);
+
+                    // Get the current date (without time for a pure date comparison)
+                    $currentDate = Carbon::now()->startOfDay();
+                @endphp
+                @if ($specificDate > $currentDate)
+                    <x-heroicon-s-clock class="w-4 h-4"/> 
+                    <span>{{$record['deadline']?->format('d M') ? : 'No Deadline'}}</span>
+                @elseif ($specificDate->greaterThan($currentDate))
+                    <x-heroicon-s-clock class="w-4 h-4"/> 
+                    <span>{{$record['deadline']?->format('d M')}}</span>
+                @else
+                    <x-heroicon-s-clock class="w-4 h-4 text-red-500"/> 
+                    <span title="Past the Deadline" class="text-red-500">{{$record['deadline']?->format('d M')}}</span>
+                @endif
+                
+                
             </div>
         </div>
         <div class="border-b" style="border-color: {{$record->color}}"></div>
