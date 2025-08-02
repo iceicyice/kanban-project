@@ -77,7 +77,7 @@
                             destroyAllSortables();
                             initStatusSortable();
                             initTaskSortables();
-                        }, 250);
+                        }, 150);
                     }
                 });
             };

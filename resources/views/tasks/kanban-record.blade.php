@@ -13,7 +13,7 @@
             setTimeout(() => {
                 $el.classList.remove('bg-primary-100', 'dark:bg-primary-800')
                 $el.classList.add('bg-white', 'dark:bg-gray-700')
-            }, 3000)
+            }, 2000)
         "
     @endif
 >

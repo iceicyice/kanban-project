@@ -227,7 +227,19 @@ class TasksKanban extends KanbanBoard
                     ->action(function () {
                         $this->urgent = $this->urgent === 'checked' ? '' : 'checked';
                         $this->dispatch('$refresh'); // rerender the board
+                    }),
+                CreateAction::make('Status')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['task_project_id'] = $this->project->id;
+                        return $data;
                     })
+                    ->model(Status::class)
+                    ->label('Add New Status')
+                    ->form([
+                        TextInput::make('name')
+                            ->label('Status Name')
+                            ->required()
+                    ])
         ];
     }
 
