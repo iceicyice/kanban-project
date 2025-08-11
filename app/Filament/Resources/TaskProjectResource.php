@@ -29,6 +29,9 @@ class TaskProjectResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationGroup = 'Project Management';
+    
+    protected static ?string $navigationLabel = 'Projects';
+    
 
     public static function form(Form $form): Form
     {
@@ -86,6 +89,14 @@ class TaskProjectResource extends Resource
                     )
                     ->tooltip(fn($state, $record) => 
                         $record->statuses->pluck('name')),
+                TextColumn::make('deadline')
+                    ->label('Deadline')
+                    ->sortable(),
+                TextColumn::make('progress')
+                    ->label('Progress')
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => "{$state}%")
+                    ->color(fn ($state) => $state < 50 ? 'danger' : 'success'),
             ])
             ->filters([
                 //

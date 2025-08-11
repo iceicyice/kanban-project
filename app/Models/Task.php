@@ -26,6 +26,7 @@ class Task extends Model implements Sortable
         'note',
         'tag',
         'attachment',
+        'checklist',
         'deadline',
         'color',
         'status_id',
@@ -69,11 +70,19 @@ class Task extends Model implements Sortable
         });
     }
 
+    protected static function booted()
+    {
+        static::saved(fn ($tasks) => $tasks->project->updateProgress());
+        static::deleted(fn ($tasks) => $tasks->project->updateProgress());
+    }
+
     protected $casts = [
         'urgent' => 'boolean',
         'tag' => 'array',
+        'checklist' => 'array',
         'attachment' => 'array',
         'deadline' => 'datetime',
+        'progress' => 'integer',
     ];
     
     public function statuses()

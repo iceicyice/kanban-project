@@ -16,6 +16,7 @@ class TaskProject extends Model
         'name',
         'description',
         'deadline',
+        'progress',
     ];
 
     public $timestamps = true;
@@ -38,6 +39,16 @@ class TaskProject extends Model
     public function statuses(): HasMany
     {
         return $this->hasMany(Status::class, 'task_project_id');
+    }
+
+    public function updateProgress()
+    {
+        $totalTask = $this->tasks()->count();
+        $totalProgress = $this->tasks()->sum('progress');
+
+        $this->update([
+            'progress' => $totalTask > 0 ? round($totalProgress / $totalTask) : 0 
+        ]);
     }
 
 }

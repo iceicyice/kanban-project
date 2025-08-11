@@ -1,4 +1,5 @@
 <script>
+    
     document.addEventListener('DOMContentLoaded', () => {
         const setupKanban = () => {
             const componentEl = document.querySelector('[wire\\:id]');

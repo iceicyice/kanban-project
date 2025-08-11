@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description');
+            $table->tinyInteger('progress')->default(0);
             $table->timestamps();
             $table->date('deadline')->nullable();
         });
@@ -44,6 +45,7 @@ return new class extends Migration
             $table->tinyInteger('progress')->default(0);
             $table->text('note')->nullable();
             $table->text('tag')->nullable();
+            $table->json('checklist')->nullable();
             $table->date('deadline')->nullable();
             $table->text('attachment')->nullable();
             $table->foreignId('user_id')->constrained();

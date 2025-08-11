@@ -21,6 +21,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Navigation\NavigationItem;
 use Filament\Forms\Components\TagsInput;
@@ -31,6 +32,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\CheckboxList;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
 
@@ -38,7 +40,7 @@ class TasksKanban extends KanbanBoard
 {
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $title = 'Tasks';
+    // protected static ?string $title = 'Tasks';
     protected static string $model = Task::class;
 
     protected static bool $shouldRegisterNavigation = false;
@@ -87,6 +89,12 @@ class TasksKanban extends KanbanBoard
         if (! $isMember) {
             abort(403, 'You are not authorized to view this project.');
         }
+    }
+
+    public function getTitle(): string
+    {
+        $project = TaskProject::find($this->project->id);
+        return $project->name . ' (' . $project->progress . '%)';
     }
     
 
@@ -177,6 +185,24 @@ class TasksKanban extends KanbanBoard
         Task::ignoreTimestamps(false);
     }
 
+    private function calculateProgressFromChecklist(array|null $checklist): int
+    {
+        if (empty($checklist)) {
+            return 0;
+        }
+
+        $total = count($checklist);
+        $completed = 0;
+
+        foreach ($checklist as $item) {
+            if (!empty($item['done'])) {
+                $completed++;
+            }
+        }
+
+        return (int) round(($completed / $total) * 100);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -216,10 +242,31 @@ class TasksKanban extends KanbanBoard
                                     ->required(),
                                 TagsInput::make('tag')
                                     ->label('Tags'),
+
+                                Repeater::make('checklist')
+                                    ->label('Checklist')
+                                    ->schema([
+                                        TextInput::make('label')->label('Item')->required(),
+                                        Checkbox::make('done')->label('Completed'),
+                                    ])
+                                    ->default([])
+                                    ->createItemButtonLabel('Add checklist item')
+                                    ->columns(2)
+                                    ->columnSpanFull()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, $state) {
+                                        $set('progress', $this->calculateProgressFromChecklist($state));
+                                    }),
+                                    
+                                RangeSlider::make('progress')
+                                    ->label('Progress')
+                                    ->default(0)
+                                    ->reactive(),
+
                             ])->grow(true),
                         ])->from('xs'),
-                    ]
-                ),
+                    ]),
+
                 Action::make('toggleUrgent')
                     ->label(fn () => $this->urgent === 'checked' ? 'Show All Tasks' : 'Show Urgent Only')
                     ->icon('heroicon-o-clock')
@@ -228,6 +275,7 @@ class TasksKanban extends KanbanBoard
                         $this->urgent = $this->urgent === 'checked' ? '' : 'checked';
                         $this->dispatch('$refresh'); // rerender the board
                     }),
+
                 CreateAction::make('Status')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['task_project_id'] = $this->project->id;
@@ -267,6 +315,23 @@ class TasksKanban extends KanbanBoard
                                     ->required(),
                                 TagsInput::make('tag')
                                     ->label('Tags'),
+                                Repeater::make('checklist')
+                                    ->label('Checklist')
+                                    ->schema([
+                                        TextInput::make('label')
+                                            ->label('Item')
+                                            ->required(),
+                                        Checkbox::make('done')
+                                            ->label('Completed'),
+                                    ])
+                                    ->default([])
+                                    ->createItemButtonLabel('Add checklist item')
+                                    ->columns(2)
+                                    ->columnSpanFull()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, $state) {
+                                        $set('progress', $this->calculateProgressFromChecklist($state));
+                                    }),
                                 RangeSlider::make('progress')
                                     ->live(),
                             ])->grow(true),

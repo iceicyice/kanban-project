@@ -137,6 +137,7 @@ h1 {
         max="100" 
         x-model="state" 
         :style="sliderBackground"
+        disabled
         />
         <div class="flex">
             <div class="value" x-text="state"></div><span class="ml-2.5" class="">%</span>
