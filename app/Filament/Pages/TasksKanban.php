@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Forms\Components\RangeSlider;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use App\Forms\Components\CommentsField;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
@@ -32,8 +33,11 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\CheckboxList;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
+use CoolSam\NestedComments\Http\Livewire\NestedComments;
+
 
 
 class TasksKanban extends KanbanBoard
@@ -254,7 +258,7 @@ class TasksKanban extends KanbanBoard
                                     ->columns(2)
                                     ->columnSpanFull()
                                     ->reactive()
-                                    ->afterStateUpdated(function (callable $set, $state) {
+                                    ->afterStateUpdated(function ($state, callable $set) {
                                         $set('progress', $this->calculateProgressFromChecklist($state));
                                     }),
                                     
@@ -293,12 +297,18 @@ class TasksKanban extends KanbanBoard
 
     protected function getEditModalFormSchema(string|int|null $recordId): array
     {
+
+        $task = Task::find($recordId);
+
         return [
                 Split::make([
                             Section::make([
                                 TextInput::make('title')->required(),
                                 Textarea::make('description')->required(),
-                                RichEditor::make('note'),
+                                RichEditor::make('note')
+                                    ->extraAttributes([
+                                            'style' => 'max-height: 150px; overflow-y: auto; padding: 10px 10px;'
+                                        ]),
                                 FileUpload::make('attachment')
                                     ->directory('task-attachments')
                                     ->visibility('private')
@@ -314,15 +324,15 @@ class TasksKanban extends KanbanBoard
                                     ->hexColor()
                                     ->required(),
                                 TagsInput::make('tag')
-                                    ->label('Tags'),
+                                    ->label('Tags'), 
                                 Repeater::make('checklist')
                                     ->label('Checklist')
+                                    ->collapsible()
                                     ->schema([
                                         TextInput::make('label')
-                                            ->label('Item')
+                                            ->hiddenLabel()
                                             ->required(),
                                         Checkbox::make('done')
-                                            ->label('Completed'),
                                     ])
                                     ->default([])
                                     ->createItemButtonLabel('Add checklist item')
@@ -331,10 +341,22 @@ class TasksKanban extends KanbanBoard
                                     ->reactive()
                                     ->afterStateUpdated(function (callable $set, $state) {
                                         $set('progress', $this->calculateProgressFromChecklist($state));
-                                    }),
+                                    })->extraAttributes([
+                                        'style' => 'max-height: 200px; overflow-y: auto; padding: 10px 10px;'
+                                    ]),
+                                    
                                 RangeSlider::make('progress')
-                                    ->live(),
+                                    // ->live(),
                             ])->grow(true),
+                                
+                            Section::make([
+                                ViewField::make('comments')
+                                    ->view('forms.components.nested-comments', [
+                                        'record' => $task, // Pass the Task model, not the ID
+                                    ])
+                                    ->columnSpanFull(),
+                            ])->visible($task !== null),
+
                         ])->from('xs'),
                 ];
     }

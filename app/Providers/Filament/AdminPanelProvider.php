@@ -12,11 +12,14 @@ use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\TasksKanban;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Filament\Navigation\NavigationItem;
 use Filament\Http\Middleware\Authenticate;
+use App\Filament\Widgets\TopbarNotifications;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -52,7 +55,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
                 \App\Filament\Pages\TasksKanban::class
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
@@ -60,6 +63,17 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
+            ->navigationItems([
+                NavigationItem::make('New Project')
+                    ->url('/task-projects/create')
+                    ->icon('heroicon-o-plus-circle')
+                    ->group('Projects')
+                    ->badge('New')
+            ])
+            // ->renderHook(
+            //     PanelsRenderHook::TOPBAR_END,
+            //     fn (): string => Blade::render('@livewire(\'topbar-notifications\')')
+            // )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -85,6 +99,7 @@ class AdminPanelProvider extends PanelProvider
                         
                     ),
             ]);
+            
     }
 
     public function boot(): void
@@ -100,7 +115,7 @@ class AdminPanelProvider extends PanelProvider
                 Filament::registerNavigationItems([
                     NavigationItem::make($project->name)
                         ->group('Projects')
-                        ->icon('heroicon-o-clipboard-document-list')
+                        // ->icon('heroicon-o-clipboard-document-list')
                         ->url('/tasks-kanban?project=' . $project->id)
                         ->badge(Task::where('task_project_id', $project->id)->count())
                         ->isActiveWhen(fn () => request()->query('project') == $project->id)

@@ -1,7 +1,3 @@
-<x-dynamic-component
-    :component="$getFieldWrapperView()"
-    :field="$field"
->
 <style>
     input[type="range"] {
   /* removing default appearance */
@@ -115,34 +111,57 @@ h1 {
 }
 </style>
 
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :field="$field"
+>
     <div 
         x-data="{ 
             state: $wire.entangle('{{ $getStatePath() }}'), 
-            sliderBackground: '', 
+            display: 0, // animated value
+            sliderBackground: '',
 
             updateSliderBackground(value) { 
                 const progress = (value / 100) * 100;
                 this.sliderBackground = `background: linear-gradient(to right, #f50 ${progress}%, #ccc ${progress}%)`;
-            } 
-        }"
-        x-init="$watch('state', value => updateSliderBackground(value))"
-     
+            },
 
->
-        <!-- Interact with the `state` property in Alpine.js -->
-       
+            animateTo(newValue) {
+                let start = this.display;
+                let end = newValue;
+                let startTime;
+
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    let progress = Math.min((timestamp - startTime) / 300, 1); // 300ms animation
+                    this.display = Math.round(start + (end - start) * progress);
+                    this.updateSliderBackground(this.display);
+                    if (progress < 1) requestAnimationFrame(step);
+                };
+
+                requestAnimationFrame(step);
+            }
+        }"
+        x-init="
+            display = state;
+            updateSliderBackground(display);
+            $watch('state', value => animateTo(value));
+        "
+        class="flex items-center gap-4"
+    >
         <input 
-        type="range" 
-        min="0" 
-        max="100" 
-        x-model="state" 
-        :style="sliderBackground"
-        disabled
+            type="range" 
+            min="0" 
+            max="100" 
+            x-model="display" 
+            :style="sliderBackground"
+            disabled
         />
-        <div class="flex">
-            <div class="value" x-text="state"></div><span class="ml-2.5" class="">%</span>
+
+        <div class="flex items-center">
+            <div class="value" x-text="display"></div>
+            <span class="ml-1">%</span>
         </div>
     </div>
-
-    
 </x-dynamic-component>
+

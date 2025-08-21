@@ -2,7 +2,7 @@
 
 <div 
     wire:key="kanban-status-{{ $status['id'] }}"
-    class="status-column md:w-[15rem] flex-shrink-0 mb-5 md:min-h-full flex flex-col"
+    class="status-column md:w-[18rem] flex-shrink-0 mb-5 md:min-h-full flex flex-col"
     data-id="{{$status['id']}}"
     >
 

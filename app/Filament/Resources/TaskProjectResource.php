@@ -32,6 +32,10 @@ class TaskProjectResource extends Resource
     
     protected static ?string $navigationLabel = 'Projects';
     
+    public static function canEdit($record): bool
+    {
+        return $record->users->contains(auth()->id());
+    }
 
     public static function form(Form $form): Form
     {
@@ -71,6 +75,12 @@ class TaskProjectResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                    TaskProject::query()
+                        ->whereHas('users', fn($q) => 
+                            $q->where('users.id', auth()->id())
+                        )
+            )
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
