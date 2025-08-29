@@ -1,5 +1,5 @@
-<div x-data wire:poll.15s>
-    <div class="my-4 p-8 bg-gray-50 rounded-lg ring-gray-100 dark:bg-gray-950">
+<div x-data wire:poll.5s>
+    <div class="my-1 p-4 bg-gray-50 rounded-lg ring-gray-100 dark:bg-gray-950">
         <div class="flex flex-wrap items-center justify-between">
             <div x-data="{showFullDate: false}" class="flex items-center space-x-2">
                 <x-filament::avatar

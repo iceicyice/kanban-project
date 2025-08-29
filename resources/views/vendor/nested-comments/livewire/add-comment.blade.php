@@ -22,4 +22,34 @@
         </x-filament::input.wrapper>
     @endif
     <x-filament-actions::modals />
+    <style>
+        /* Target images inside the mention suggestion buttons */
+        .tippy-content img.object-cover {
+            width: 40px !important;   
+            height: 40px !important;  
+            border-radius: 9999px;
+            object-fit: cover;
+            margin-right: 7px;
+        }
+        
+        /* Kill the default orange selected */
+        .tippy-content .mention-dropdown [aria-selected="true"],
+        .tippy-content .mention-dropdown .bg-primary-500 {
+            background-color: transparent !important;
+            color: inherit !important;
+        }
+
+        /* Light mode → dark hover */
+        .tippy-content .mention-dropdown button:hover {
+            background-color: #374151 !important; /* gray-700 */
+            color: white !important;
+        }
+
+        /* Dark mode → light hover */
+        .dark .tippy-content .mention-dropdown button:hover {
+            background-color: #f3f4f6 !important; /* gray-100 */
+            color: black !important;
+        }
+
+    </style>
 </div>

@@ -14,8 +14,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Actions\ExportAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Exports\TaskProjectExporter;
+use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TaskProjectResource\Pages;
 use App\Filament\Resources\TaskProjectResource\RelationManagers;
@@ -75,6 +80,7 @@ class TaskProjectResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->selectable()
             ->query(
                     TaskProject::query()
                         ->whereHas('users', fn($q) => 
@@ -107,17 +113,25 @@ class TaskProjectResource extends Resource
                     ->sortable()
                     ->formatStateUsing(fn ($state) => "{$state}%")
                     ->color(fn ($state) => $state < 50 ? 'danger' : 'success'),
+                
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                ])
+                
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                
+                    ExportBulkAction::make()
+                        ->label('Export')
+                        ->exporter(TaskProjectExporter::class)
+                        ->formats([
+                            ExportFormat::Xlsx,
+                        ])
             ]);
     }
 

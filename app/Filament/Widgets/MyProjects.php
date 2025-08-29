@@ -6,7 +6,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\TaskProject;
 use Filament\Tables\Columns\TextColumn;
+use App\Filament\Exports\TaskProjectExporter;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class MyProjects extends BaseWidget
 {
@@ -43,6 +46,15 @@ class MyProjects extends BaseWidget
                     ->sortable()
                     ->formatStateUsing(fn ($state) => "{$state}%")
                     ->color(fn ($state) => $state < 50 ? 'danger' : 'success'),
+            ])
+            ->bulkActions([
+                
+                    ExportBulkAction::make()
+                        ->label('Export')
+                        ->exporter(TaskProjectExporter::class)
+                        ->formats([
+                            ExportFormat::Xlsx,
+                        ])
             ]);
     }
 }

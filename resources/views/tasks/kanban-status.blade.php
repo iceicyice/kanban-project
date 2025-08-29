@@ -14,7 +14,8 @@
         wire:key="kanban-task-list-{{ $status['id'] }}"
         data-status-id="{{ $status['id'] }}"
         x-data
-        class="flex flex-col flex-1 gap-2 p-3 bg-gray-200 dark:bg-gray-800 rounded-xl"
+        class="flex flex-col flex-1 gap-2 p-3 bg-gray-200 dark:bg-gray-800 rounded-xl
+        overflow-y-auto max-h-[70vh]"
         
     >
         @foreach($status['records'] as $record)

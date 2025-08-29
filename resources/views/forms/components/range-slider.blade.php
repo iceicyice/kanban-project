@@ -160,7 +160,7 @@ h1 {
 
         <div class="flex items-center">
             <div class="value" x-text="display"></div>
-            <span class="ml-1">%</span>
+            <span class="ml-4">%</span>
         </div>
     </div>
 </x-dynamic-component>

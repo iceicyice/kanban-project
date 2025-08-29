@@ -2,9 +2,9 @@
     
     document.addEventListener('DOMContentLoaded', () => {
         const setupKanban = () => {
-            const componentEl = document.querySelector('[wire\\:id]');
-            if (!componentEl) return;
-            const component = Livewire.find(componentEl.getAttribute('wire:id'));
+            const componentEl = document.querySelector('#kanban-board');
+            const component = Livewire.find(componentEl.closest('[wire\\:id]').getAttribute('wire:id'));
+
 
             const destroyAllSortables = () => {
                 document.querySelectorAll('[data-status-id]').forEach(el => {
@@ -39,7 +39,7 @@
                             // You can clear it later (or rely on Livewire hooks to do it)
                             setTimeout(() => {
                                 window.dispatchEvent(new CustomEvent('livewire:load'))
-                            }, 1000)
+                            }, 600)
                         },
                         setData(dataTransfer, el) {
                             dataTransfer.setData('id', el.id);
@@ -70,7 +70,15 @@
                     handle: '.status-header',
                     draggable: '.status-column',
                     onEnd() {
-                        const orderedIds = Array.from(board.querySelectorAll('.status-column')).map(col => col.dataset.id);
+
+                        window.dispatchEvent(new CustomEvent('livewire:loading'))
+
+                        // You can clear it later (or rely on Livewire hooks to do it)
+                        setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('livewire:load'))
+                        }, 1000)
+
+                        const orderedIds = Array.from   (board.querySelectorAll('.status-column')).map(col => col.dataset.id);
                         component.call('updateStatusOrder', orderedIds);
 
                         // Wait for Livewire to re-render before reinitializing
@@ -78,7 +86,7 @@
                             destroyAllSortables();
                             initStatusSortable();
                             initTaskSortables();
-                        }, 150);
+                        }, 500);
                     }
                 });
             };
@@ -94,7 +102,7 @@
                     destroyAllSortables();
                     initStatusSortable();
                     initTaskSortables();
-                }, 150);
+                }, 250);
             });
         };
 

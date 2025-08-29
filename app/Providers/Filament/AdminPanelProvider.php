@@ -6,6 +6,7 @@ use Filament\Pages;
 use Filament\Panel;
 use App\Models\Task;
 use Filament\Widgets;
+use Livewire\Livewire;
 use App\Models\TaskProject;
 use Filament\PanelProvider;
 use Filament\Facades\Filament;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use App\Filament\Topbar\Notifications;
 use Filament\Navigation\NavigationItem;
 use Filament\Http\Middleware\Authenticate;
 use App\Filament\Widgets\TopbarNotifications;
@@ -70,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Projects')
                     ->badge('New')
             ])
+            ->sidebarFullyCollapsibleOnDesktop()
             // ->renderHook(
             //     PanelsRenderHook::TOPBAR_END,
             //     fn (): string => Blade::render('@livewire(\'topbar-notifications\')')
@@ -122,5 +125,12 @@ class AdminPanelProvider extends PanelProvider
                 ]);
             }
         });
+
+        Livewire::component('notifications', Notifications::class);
+
+        Filament::registerRenderHook(
+            PanelsRenderHook::TOPBAR_END,
+            fn () => Livewire::mount('notifications', [], 'topbar-notifications')
+        );
     }
 }

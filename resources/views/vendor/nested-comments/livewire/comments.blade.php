@@ -10,14 +10,14 @@
         </div>
     </x-slot>
 
-    <div class="flex flex-col h-[450px]"> {{-- set a fixed height --}}
+    <div class="flex flex-col h-[520px]">
         {{-- Scrollable comments list --}}
         <x-slot name="headerEnd">
             <x-filament::button wire:click.prevent="refreshComments()">Refresh</x-filament::button>
         </x-slot>
         <div class="flex-1 overflow-y-auto pr-2 space-y-2">
             @foreach($this->comments as $comment)
-                <livewire:nested-comments::comment-card
+                <livewire:nested-comments::comment-card class="w-[250px]"
                     :key="$comment->getKey()"
                     :comment="$comment"
                 />

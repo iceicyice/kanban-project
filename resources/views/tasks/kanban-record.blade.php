@@ -37,6 +37,9 @@
                 @elseif ($specificDate->greaterThan($currentDate))
                     <x-heroicon-s-clock class="w-4 h-4"/> 
                     <span>{{$record['deadline']?->format('d M')}}</span>
+                @elseif ($record['progress'] == 100)
+                    <x-heroicon-s-clock class="w-4 h-4 text-green-500"/> 
+                    <span class="text-green-500">{{$record['deadline']?->format('d M')}}</span>
                 @else
                     <x-heroicon-s-clock class="w-4 h-4 text-red-500"/> 
                     <span title="Past the Deadline" class="text-red-500">{{$record['deadline']?->format('d M')}}</span>

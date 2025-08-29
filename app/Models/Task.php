@@ -6,14 +6,16 @@ use App\Models\Status;
 use App\Models\TaskProject;
 use Spatie\EloquentSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\EloquentSortable\SortableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Coolsam\NestedComments\Concerns\HasComments;
 use Coolsam\NestedComments\Concerns\HasReactions;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory; 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Builder;
 
 
 class Task extends Model implements Sortable
@@ -96,13 +98,13 @@ class Task extends Model implements Sortable
 
     public function getUserAvatar(Model|Authenticatable|string|null $user): ?string
     {
-        // If user has a Filament avatar, return it
-        if ($user && method_exists($user, 'getFilamentAvatarUrl')) {
-            return $user->getFilamentAvatarUrl();
+        if ($user && $user->avatar_url) {
+            // Return stored avatar from storage
+            return Storage::url($user->avatar_url);
         }
 
-        // Return null → NestedComments will fallback to initials/slug
-        return null;
+        // Fallback → default ui-avatars
+        return 'https://ui-avatars.com/api/?name=' . urlencode($user->name);
     }
 
     public function getMentionsQuery(string $query): Builder

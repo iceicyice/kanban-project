@@ -59,7 +59,7 @@ class TasksKanban extends KanbanBoard
     // protected static ?int $navigationSort = 2;
 
     protected string $editModalTitle = 'Edit Task';
-    protected string $editModalWidth = '5xl';
+    protected string $editModalWidth = '7xl';
     protected string $editModalSaveButtonLabel = 'Save';
     protected string $editModalCancelButtonLabel = 'Cancel';
 
@@ -71,6 +71,8 @@ class TasksKanban extends KanbanBoard
 
     protected $listeners = [
         'updateStatusOrder',
+        'updateStatusOrder',
+        'onStatusChanged', // Add this
     ];
     
 
@@ -315,7 +317,10 @@ class TasksKanban extends KanbanBoard
                                     ->preserveFilenames()
                                     ->multiple()
                                     ->reorderable()
-                                    ->openable(),
+                                    ->openable()
+                                    ->extraAttributes([
+                                            'style' => 'height: 150px; overflow-y: auto; padding: 16px 16px;'
+                                        ]),
                             ]),
                             Section::make([
                                 Checkbox::make('urgent'),
@@ -325,13 +330,20 @@ class TasksKanban extends KanbanBoard
                                     ->required(),
                                 TagsInput::make('tag')
                                     ->label('Tags'), 
+                            ])->grow(true),
+
+                            Section::make([
                                 Repeater::make('checklist')
                                     ->label('Checklist')
                                     ->collapsible()
                                     ->schema([
                                         TextInput::make('label')
                                             ->hiddenLabel()
-                                            ->required(),
+                                            ->required()
+                                            ->columnSpanFull()
+                                            ->extraAttributes([
+                                                'style' => 'font-size: 10px; padding: 10px; margin-bottom: -20px',
+                                            ]),
                                         Checkbox::make('done')
                                     ])
                                     ->default([])
@@ -342,12 +354,12 @@ class TasksKanban extends KanbanBoard
                                     ->afterStateUpdated(function (callable $set, $state) {
                                         $set('progress', $this->calculateProgressFromChecklist($state));
                                     })->extraAttributes([
-                                        'style' => 'max-height: 200px; overflow-y: auto; padding: 10px 10px;'
+                                        'style' => 'width: 280px; max-width: 280px; max-height: 400px; overflow-y: auto; padding: 10px 10px; margin-left: -15px'
                                     ]),
                                     
                                 RangeSlider::make('progress')
                                     // ->live(),
-                            ])->grow(true),
+                                ]),
                                 
                             Section::make([
                                 ViewField::make('comments')
