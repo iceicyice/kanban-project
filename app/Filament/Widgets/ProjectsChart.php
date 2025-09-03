@@ -17,18 +17,19 @@ class ProjectsChart extends ChartWidget
             );
 
         $notStarted = (clone $query)->where('progress', 0)->count();
-        $doing = (clone $query)->whereBetween('progress', [1, 99])->count();
+        $doing = (clone $query)->whereBetween('progress', [1, 50])->count();
+        $almost = (clone $query)->whereBetween('progress', [51, 90])->count();
         $done = (clone $query)->where('progress', 100)->count();
 
         return [
             'datasets' => [
                 [
                     'label' => 'Projects',
-                    'data' => [$notStarted, $doing, $done],
-                    'backgroundColor' => ['#f87171', '#60a5fa', '#34d399'], // red, blue, green
+                    'data' => [$notStarted, $doing, $almost, $done],
+                    'backgroundColor' => ['#f87171', '#ffa852', '#60a5fa', '#34d399'], // red, orange, blue, green
                 ],
             ],
-            'labels' => ['Not Started', 'Doing', 'Done'],
+            'labels' => ['Not Started (0%)', 'Doing (1-50%)', 'Almost Done (51-90%)', 'Done (100%)'],
         ];
     }
 

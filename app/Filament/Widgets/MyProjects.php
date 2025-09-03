@@ -45,7 +45,7 @@ class MyProjects extends BaseWidget
                     ->label('Progress')
                     ->sortable()
                     ->formatStateUsing(fn ($state) => "{$state}%")
-                    ->color(fn ($state) => $state < 50 ? 'danger' : 'success'),
+                    // ->color(fn ($state) => $state < 100 ? 'info' : 'success'),
             ])
             ->bulkActions([
                 
